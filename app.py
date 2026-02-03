@@ -1,35 +1,28 @@
 import streamlit as st
 import joblib
 import numpy as np
-# Load the trained regression model
-model=joblib.load('regression_model.joblib')
-# App UI
+import os
+
+# Load model safely
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+model_path = os.path.join(BASE_DIR, "regression_model.joblib")
+
+try:
+    model = joblib.load(model_path)
+except Exception as e:
+    st.error("Failed to load model file.")
+    st.stop()
+
 st.title("Job Package Prediction Based on CGPA")
-st.write("Enter your CGPA to predict the expected job pacakge:")
+st.write("Enter your CGPA to predict the expected job package:")
 
-# CGPA input
-cgpa = st.number_input(
-    "CGPA",
-    min_value=0.0,
-    max_value=10.0,
-    step=0.1
-)
-#Predict button
+cgpa = st.number_input("CGPA", 0.0, 10.0, step=0.1)
+
 if st.button("Predict Package"):
-    # Prepare input for model
-    input_data=np.array([[cgpa]])
-
-    # Make prediction
-    prediction=model.predict(input_data)
-
-    # Convert NumPy output to Python flpat safely
-    predicted_value=prediction.item()
-
-    # Optional:Prevent nagative output
-    predicted_value=max(predicted_value,0)
-
-    # Dispaly result
-    st.success(f"Predicted package: ₹{predicted_value:,.2f}LPA")
+    input_data = np.array([[cgpa]])
+    prediction = model.predict(input_data)
+    predicted_value = max(prediction.item(), 0)
+    st.success(f"Predicted package: ₹{predicted_value:,.2f} LPA")
 
 
 # import streamlit as st
